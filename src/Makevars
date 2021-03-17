@@ -1,0 +1,5 @@
+## -- compiling for OpenMP 
+PKG_CFLAGS=-fopenmp
+##
+## -- linking for OpenMP
+PKG_LIBS= -fopenmp -lgomp 

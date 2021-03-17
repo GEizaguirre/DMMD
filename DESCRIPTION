@@ -1,0 +1,41 @@
+Package: Motif
+Type: Package
+Title: DNA Methylation Motif Discovery (DMMD)
+Depends: R (>= 2.7.1)
+Version: 1.0
+Date: 17-03-2020
+Author: German T. Eizaguirre, Inigo Reiriz and Marcos J. Arauzo-Bravo
+Maintainer: German T. Eizaguirre <gteizaguirre@gmail.com> and Marcos J. Arauzo-Bravo <mararabra@yahoo.co.uk>
+Description: This package creates DNA methylation motifs
+Collate:
+  MethylDNAFunc.R
+  DiscoverMotif.R
+  DiscoverOptimalMotifDisplacement.R
+  ResultAnalysis.R
+  wgbs_data_read.R
+  RcppExports.R
+  fusion.R
+  fdr.R
+  distribution_difference.R
+  gene_annotation_read.R
+License: GPL-2
+Imports:
+	cluster,
+	seqinr,
+	data.table,
+	seqLogo,
+	parallel,
+	ggplot2,
+	fastcluster,
+	mefa,
+	foreach,
+	doMC,
+	plyr,
+	extrafont,
+	pryr,
+	R.utils,
+	dplyr,
+	magrittr,				
+	Rcpp (>= 1.0.6)
+LinkingTo: Rcpp
+LazyLoad: yes
