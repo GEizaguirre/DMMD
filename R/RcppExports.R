@@ -2,14 +2,18 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 fdr_c <- function(ScoDatFraPro, ScoDatFraRes, lambda, type_motif) {
-    .Call('_DMMD_fdr_c', PACKAGE = 'DMMD', ScoDatFraPro, ScoDatFraRes, lambda, type_motif)
+    .Call('_Motif_fdr_c', PACKAGE = 'Motif', ScoDatFraPro, ScoDatFraRes, lambda, type_motif)
 }
 
 cpp_str_sort <- function(in_str, out_str) {
-    .Call('_DMMD_cpp_str_sort', PACKAGE = 'DMMD', in_str, out_str)
+    .Call('_Motif_cpp_str_sort', PACKAGE = 'Motif', in_str, out_str)
+}
+
+fuse_seqs_c <- function(motif_length, grow_mode, ind_fu, ind_fu_upd, fre_w, sg_w, fre_w_vec, fre_w_next, sg_w_next, fre_w_vec_next) {
+    .Call('_Motif_fuse_seqs_c', PACKAGE = 'Motif', motif_length, grow_mode, ind_fu, ind_fu_upd, fre_w, sg_w, fre_w_vec, fre_w_next, sg_w_next, fre_w_vec_next)
 }
 
 scan_seqs_c <- function(nSeq, LenMot, NumSeq, WeiLogPomElem, WeiLogPWVElem) {
-    .Call('_DMMD_scan_seqs_c', PACKAGE = 'DMMD', nSeq, LenMot, NumSeq, WeiLogPomElem, WeiLogPWVElem)
+    .Call('_Motif_scan_seqs_c', PACKAGE = 'Motif', nSeq, LenMot, NumSeq, WeiLogPomElem, WeiLogPWVElem)
 }
 

@@ -59,7 +59,11 @@ Fusion=function(Config,SeqMetFreW,FreVecW){
       IndNextW=SeqMetFreW[[w+1]][,4]
       FreNextWVec=FreVecW[[w+1]]
       
-      if (Config$GrowingMode=="C") SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 2, 2*(w+1)+2-1)))
+      
+      if (Config$GrowingMode=="C") {
+        cut_point <- 2*w+1
+        SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 2, cut_point)))
+      }
       if (Config$GrowingMode=="R") SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 1, 2*(w+1))))
       if (Config$GrowingMode=="L") SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 3, 2*(w+1)+2)))
       
@@ -69,15 +73,24 @@ Fusion=function(Config,SeqMetFreW,FreVecW){
       # Get index of elements that have to be fusioned.
       IndFoUpd=which(IndFou %ni% 0)
       
-      OutFus=FuseSeq(Config, SeqW,MetW,FreW,IndW,FreWVec,SeqNextW,MetNextW,FreNextW,IndNextW,FreNextWVec,IndFou,IndFoUpd)
+      # OutFus=FuseSeq(Config, SeqW,MetW,FreW,IndW,FreWVec,SeqNextW,MetNextW,FreNextW,IndNextW,FreNextWVec,IndFou,IndFoUpd)
+      grow_mode_numeric <- switch(Config$GrowingMode,
+                                   C=0,
+                                   L=1,
+                                   R=2)
       
+      ret <- fuse_seqs_c(2*w, grow_mode_numeric, IndFou, IndFoUpd, 
+                         FreW, MetW, FreWVec, 
+                         FreNextW, MetNextW, FreNextWVec)
+      
+      OutFus=list(SeqW,MetW,FreW,IndW,FreWVec,SeqNextW,ret$sg_w_next,ret$fre_w_next,IndNextW,ret$fre_w_vec_next)
       
       SeqW=OutFus[[1]]
       MetW=OutFus[[2]]
       FreW=OutFus[[3]]
       IndW=OutFus[[4]]
       FreWVec=OutFus[[5]]
-      
+
       SeqNextW=OutFus[[6]]
       MetNextW=OutFus[[7]]
       FreNextW=OutFus[[8]]

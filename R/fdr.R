@@ -1,6 +1,6 @@
 ###1st Filter: FDR
 
-FDR=function(Config,ScoMotPro,ScoMotRes,PWMFor,POMClu,LenMotif,TypeMotif){
+FDR <- function(Config,ScoMotPro,ScoMotRes,PWMFor,POMClu,LenMotif,TypeMotif){
   
   #
   # Config: configuration parameters' structure.
@@ -49,12 +49,15 @@ FDR=function(Config,ScoMotPro,ScoMotRes,PWMFor,POMClu,LenMotif,TypeMotif){
       VecFdr <- foreach(i=1:(length(ScanRes)),.combine=c) %dopar% {
         
         # Prone sequences' binding counts and breaks for this motif.
-        ScoDatFraPro=ScanPro[[i]]
+        ScoDatFraPro <- ScanPro[[i]]
         # Resistant sequences' binding counts and breaks for this motif.
-        ScoDatFraRes=ScanRes[[i]]
+        ScoDatFraRes <- ScanRes[[i]]
         
-        # Get fdr value in cpp
-        fdr <- fdr_c(ScoDatFraPro, ScoDatFraRes, lambda, type_motif_numeric)
+        if ( length(ScoDatFraPro) == 0 || length(ScoDatFraRes) == 0 )
+          fdr <- 1.0
+        else
+          # Get fdr value in cpp
+          fdr <- fdr_c(ScoDatFraPro, ScoDatFraRes, lambda, type_motif_numeric)
         fdr
       }
       

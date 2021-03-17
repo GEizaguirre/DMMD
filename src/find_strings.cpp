@@ -85,6 +85,6 @@ IndFoUpd <- which(IndFou %ni% 0)
 print(IndFou)
 print(IndFoUpd)
 
-workerFunc<-function(n) { Find(length, list(grep(SeqW[n],SeqNextWCut,fixed=TRUE), 0))}
-lapply(1:num_seq, workerFunc)
+# workerFunc<-function(n) { Find(length, list(grep(SeqW[n],SeqNextWCut,fixed=TRUE), 0))}
+# lapply(1:num_seq, workerFunc)
 */

@@ -2310,33 +2310,39 @@ ListFDR =DNAMethylationMotifFinding=function(Config){
   RR="RevResis"
   
   #context saving
-  # save(Config, 
-  #       ScoDisHigMetForProne,
-  #       ScoDisHigMetRevProne,
-  #       ScoDisHigMetForResis,
-  #       ScoDisHigMetRevResis,
-  #       ScoDisLowMetForProne,
-  #       ScoDisLowMetForResis,
-  #       ScoDisLowMetRevProne,
-  #       ScoDisLowMetRevResis,
-  #       PWMForProne,
-  #       PWMRevProne,
-  #       PWMForResis,
-  #       PWMRevResis,
-  #       POMCluForProne,
-  #       POMCluRevProne,
-  #       POMCluForResis,
-  #       POMCluRevResis,
-  #       LenMotifForProne,
-  #       LenMotifRevProne,
-  #       LenMotifForResis,
-  #       LenMotifRevResis,
-  #       FP,
-  #       RP,
-  #       FR,
-  #       RR,
-  #       Seq_Gene,
-  #       file=paste("beforeFDR28-08-2019Disp",Config$X,".RData",sep=""))
+  if (Config$X == 0){
+    save(Config,
+         ScoDisHigMetForProne,
+         ScoDisHigMetRevProne,
+         ScoDisHigMetForResis,
+         ScoDisHigMetRevResis,
+         ScoDisLowMetForProne,
+         ScoDisLowMetForResis,
+         ScoDisLowMetRevProne,
+         ScoDisLowMetRevResis,
+         LenMotifForProne,
+         LenMotifRevProne,
+         LenMotifForResis,
+         LenMotifRevResis,
+         FP,
+         RP,
+         FR,
+         RR,
+         Seq_Gene,
+         file=paste("dataFDRScoresDisp",Config$X,".RData",sep=""))
+    save(Config,
+         PWMForProne,
+         PWMRevProne,
+         PWMForResis,
+         PWMRevResis,
+         POMCluForProne,
+         POMCluRevProne,
+         POMCluForResis,
+         POMCluRevResis,
+         file=paste("dataFDRPOMsDisp",Config$X,".RData",sep=""))
+    
+  }
+
   
   # save.image(file = "DMMD2019.beforeFDR17-07-2019-01.RData")
   #load(""DMMD2019.beforeFDR17-07-2019-01.RData")

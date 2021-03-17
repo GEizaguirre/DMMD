@@ -182,8 +182,6 @@ fdr_R <- function(ScoDatFraPro, ScoDatFraRes, lambda, TypeMotif){
 #                fdr_c(ScoDatFraPro, ScoDatFraRes, lambda, type_motif_numeric),
 #                times = 10)
 
-print(dumb_function())
-
 library(doMC)
 # cl  <- makeCluster(4, 
 #                    type = "SOCK")
