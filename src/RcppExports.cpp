@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // fdr_c
 float fdr_c(NumericMatrix ScoDatFraPro, NumericMatrix ScoDatFraRes, float lambda, int type_motif);
-RcppExport SEXP _Motif_fdr_c(SEXP ScoDatFraProSEXP, SEXP ScoDatFraResSEXP, SEXP lambdaSEXP, SEXP type_motifSEXP) {
+RcppExport SEXP _DMMD_fdr_c(SEXP ScoDatFraProSEXP, SEXP ScoDatFraResSEXP, SEXP lambdaSEXP, SEXP type_motifSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -21,7 +21,7 @@ END_RCPP
 }
 // cpp_str_sort
 std::vector<std::vector <int>> cpp_str_sort(StringVector in_str, StringVector out_str);
-RcppExport SEXP _Motif_cpp_str_sort(SEXP in_strSEXP, SEXP out_strSEXP) {
+RcppExport SEXP _DMMD_cpp_str_sort(SEXP in_strSEXP, SEXP out_strSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -32,8 +32,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // fuse_seqs_c
-List fuse_seqs_c(int motif_length, int grow_mode, std::vector<std::vector<int> > ind_fu, std::vector<int> ind_fu_upd, NumericVector fre_w, NumericVector sg_w, NumericMatrix fre_w_vec, NumericVector fre_w_next, NumericVector sg_w_next, NumericMatrix fre_w_vec_next);
-RcppExport SEXP _Motif_fuse_seqs_c(SEXP motif_lengthSEXP, SEXP grow_modeSEXP, SEXP ind_fuSEXP, SEXP ind_fu_updSEXP, SEXP fre_wSEXP, SEXP sg_wSEXP, SEXP fre_w_vecSEXP, SEXP fre_w_nextSEXP, SEXP sg_w_nextSEXP, SEXP fre_w_vec_nextSEXP) {
+List fuse_seqs_c(int motif_length, int grow_mode, std::vector<std::vector<int> > ind_fu, std::vector<int> ind_fu_upd, NumericVector fre_w, NumericVector sg_w, NumericMatrix fre_w_vec, NumericVector fre_w_next, NumericVector sg_w_next, NumericMatrix fre_w_vec_next, int num_cpu);
+RcppExport SEXP _DMMD_fuse_seqs_c(SEXP motif_lengthSEXP, SEXP grow_modeSEXP, SEXP ind_fuSEXP, SEXP ind_fu_updSEXP, SEXP fre_wSEXP, SEXP sg_wSEXP, SEXP fre_w_vecSEXP, SEXP fre_w_nextSEXP, SEXP sg_w_nextSEXP, SEXP fre_w_vec_nextSEXP, SEXP num_cpuSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -47,13 +47,104 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type fre_w_next(fre_w_nextSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type sg_w_next(sg_w_nextSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type fre_w_vec_next(fre_w_vec_nextSEXP);
-    rcpp_result_gen = Rcpp::wrap(fuse_seqs_c(motif_length, grow_mode, ind_fu, ind_fu_upd, fre_w, sg_w, fre_w_vec, fre_w_next, sg_w_next, fre_w_vec_next));
+    Rcpp::traits::input_parameter< int >::type num_cpu(num_cpuSEXP);
+    rcpp_result_gen = Rcpp::wrap(fuse_seqs_c(motif_length, grow_mode, ind_fu, ind_fu_upd, fre_w, sg_w, fre_w_vec, fre_w_next, sg_w_next, fre_w_vec_next, num_cpu));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fuse_seqs_seq
+void fuse_seqs_seq(int motif_length, int grow_mode, IntegerVector str_indexes, IntegerVector subindexes, IntegerVector ind_not_void, IntegerVector fre_w, NumericVector sg_w, IntegerMatrix fre_w_vec, IntegerVector fre_w_next, NumericVector sg_w_next, IntegerMatrix fre_w_vec_next, int num_cpu);
+RcppExport SEXP _DMMD_fuse_seqs_seq(SEXP motif_lengthSEXP, SEXP grow_modeSEXP, SEXP str_indexesSEXP, SEXP subindexesSEXP, SEXP ind_not_voidSEXP, SEXP fre_wSEXP, SEXP sg_wSEXP, SEXP fre_w_vecSEXP, SEXP fre_w_nextSEXP, SEXP sg_w_nextSEXP, SEXP fre_w_vec_nextSEXP, SEXP num_cpuSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type motif_length(motif_lengthSEXP);
+    Rcpp::traits::input_parameter< int >::type grow_mode(grow_modeSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type str_indexes(str_indexesSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type subindexes(subindexesSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type ind_not_void(ind_not_voidSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type fre_w(fre_wSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type sg_w(sg_wSEXP);
+    Rcpp::traits::input_parameter< IntegerMatrix >::type fre_w_vec(fre_w_vecSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type fre_w_next(fre_w_nextSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type sg_w_next(sg_w_nextSEXP);
+    Rcpp::traits::input_parameter< IntegerMatrix >::type fre_w_vec_next(fre_w_vec_nextSEXP);
+    Rcpp::traits::input_parameter< int >::type num_cpu(num_cpuSEXP);
+    fuse_seqs_seq(motif_length, grow_mode, str_indexes, subindexes, ind_not_void, fre_w, sg_w, fre_w_vec, fre_w_next, sg_w_next, fre_w_vec_next, num_cpu);
+    return R_NilValue;
+END_RCPP
+}
+// fuse_seqs_openmp
+void fuse_seqs_openmp(int motif_length, int grow_mode, IntegerVector str_indexes, IntegerVector subindexes, IntegerVector ind_not_void, IntegerVector fre_w, NumericVector sg_w, IntegerMatrix fre_w_vec, IntegerVector fre_w_next, NumericVector sg_w_next, IntegerMatrix fre_w_vec_next, int num_cpu);
+RcppExport SEXP _DMMD_fuse_seqs_openmp(SEXP motif_lengthSEXP, SEXP grow_modeSEXP, SEXP str_indexesSEXP, SEXP subindexesSEXP, SEXP ind_not_voidSEXP, SEXP fre_wSEXP, SEXP sg_wSEXP, SEXP fre_w_vecSEXP, SEXP fre_w_nextSEXP, SEXP sg_w_nextSEXP, SEXP fre_w_vec_nextSEXP, SEXP num_cpuSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type motif_length(motif_lengthSEXP);
+    Rcpp::traits::input_parameter< int >::type grow_mode(grow_modeSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type str_indexes(str_indexesSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type subindexes(subindexesSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type ind_not_void(ind_not_voidSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type fre_w(fre_wSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type sg_w(sg_wSEXP);
+    Rcpp::traits::input_parameter< IntegerMatrix >::type fre_w_vec(fre_w_vecSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type fre_w_next(fre_w_nextSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type sg_w_next(sg_w_nextSEXP);
+    Rcpp::traits::input_parameter< IntegerMatrix >::type fre_w_vec_next(fre_w_vec_nextSEXP);
+    Rcpp::traits::input_parameter< int >::type num_cpu(num_cpuSEXP);
+    fuse_seqs_openmp(motif_length, grow_mode, str_indexes, subindexes, ind_not_void, fre_w, sg_w, fre_w_vec, fre_w_next, sg_w_next, fre_w_vec_next, num_cpu);
+    return R_NilValue;
+END_RCPP
+}
+// find_strings_seq
+List find_strings_seq(StringVector in_str, StringVector out_str);
+RcppExport SEXP _DMMD_find_strings_seq(SEXP in_strSEXP, SEXP out_strSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< StringVector >::type in_str(in_strSEXP);
+    Rcpp::traits::input_parameter< StringVector >::type out_str(out_strSEXP);
+    rcpp_result_gen = Rcpp::wrap(find_strings_seq(in_str, out_str));
+    return rcpp_result_gen;
+END_RCPP
+}
+// find_strings_par
+List find_strings_par(StringVector in_str, StringVector out_str, int num_cpu);
+RcppExport SEXP _DMMD_find_strings_par(SEXP in_strSEXP, SEXP out_strSEXP, SEXP num_cpuSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< StringVector >::type in_str(in_strSEXP);
+    Rcpp::traits::input_parameter< StringVector >::type out_str(out_strSEXP);
+    Rcpp::traits::input_parameter< int >::type num_cpu(num_cpuSEXP);
+    rcpp_result_gen = Rcpp::wrap(find_strings_par(in_str, out_str, num_cpu));
+    return rcpp_result_gen;
+END_RCPP
+}
+// c_bound_test_openmp
+NumericVector c_bound_test_openmp(NumericVector vin, int ncores);
+RcppExport SEXP _DMMD_c_bound_test_openmp(SEXP vinSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type vin(vinSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(c_bound_test_openmp(vin, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
+// c_bound_test_seq
+NumericVector c_bound_test_seq(NumericVector vin);
+RcppExport SEXP _DMMD_c_bound_test_seq(SEXP vinSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type vin(vinSEXP);
+    rcpp_result_gen = Rcpp::wrap(c_bound_test_seq(vin));
     return rcpp_result_gen;
 END_RCPP
 }
 // scan_seqs_c
 std::vector <float> scan_seqs_c(int nSeq, int LenMot, std::vector<std::vector<int>> NumSeq, NumericMatrix WeiLogPomElem, std::vector <float> WeiLogPWVElem);
-RcppExport SEXP _Motif_scan_seqs_c(SEXP nSeqSEXP, SEXP LenMotSEXP, SEXP NumSeqSEXP, SEXP WeiLogPomElemSEXP, SEXP WeiLogPWVElemSEXP) {
+RcppExport SEXP _DMMD_scan_seqs_c(SEXP nSeqSEXP, SEXP LenMotSEXP, SEXP NumSeqSEXP, SEXP WeiLogPomElemSEXP, SEXP WeiLogPWVElemSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -76,10 +167,16 @@ RcppExport SEXP scanPOMs(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 RcppExport SEXP SeqDic(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_Motif_fdr_c", (DL_FUNC) &_Motif_fdr_c, 4},
-    {"_Motif_cpp_str_sort", (DL_FUNC) &_Motif_cpp_str_sort, 2},
-    {"_Motif_fuse_seqs_c", (DL_FUNC) &_Motif_fuse_seqs_c, 10},
-    {"_Motif_scan_seqs_c", (DL_FUNC) &_Motif_scan_seqs_c, 5},
+    {"_DMMD_fdr_c", (DL_FUNC) &_DMMD_fdr_c, 4},
+    {"_DMMD_cpp_str_sort", (DL_FUNC) &_DMMD_cpp_str_sort, 2},
+    {"_DMMD_fuse_seqs_c", (DL_FUNC) &_DMMD_fuse_seqs_c, 11},
+    {"_DMMD_fuse_seqs_seq", (DL_FUNC) &_DMMD_fuse_seqs_seq, 12},
+    {"_DMMD_fuse_seqs_openmp", (DL_FUNC) &_DMMD_fuse_seqs_openmp, 12},
+    {"_DMMD_find_strings_seq", (DL_FUNC) &_DMMD_find_strings_seq, 2},
+    {"_DMMD_find_strings_par", (DL_FUNC) &_DMMD_find_strings_par, 3},
+    {"_DMMD_c_bound_test_openmp", (DL_FUNC) &_DMMD_c_bound_test_openmp, 2},
+    {"_DMMD_c_bound_test_seq", (DL_FUNC) &_DMMD_c_bound_test_seq, 1},
+    {"_DMMD_scan_seqs_c", (DL_FUNC) &_DMMD_scan_seqs_c, 5},
     {"CooChr",              (DL_FUNC) &CooChr,              4},
     {"DissimilarityMatrix", (DL_FUNC) &DissimilarityMatrix, 4},
     {"filtmdfile",          (DL_FUNC) &filtmdfile,          2},
@@ -90,7 +187,7 @@ static const R_CallMethodDef CallEntries[] = {
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_Motif(DllInfo *dll) {
+RcppExport void R_init_DMMD(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

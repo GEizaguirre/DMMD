@@ -1,4 +1,4 @@
-Package: Motif
+Package: DMMD
 Type: Package
 Title: DNA Methylation Motif Discovery (DMMD)
 Depends: R (>= 2.7.1)

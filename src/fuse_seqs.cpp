@@ -4,7 +4,8 @@ using namespace Rcpp;
 // [[Rcpp::export]]
 List fuse_seqs_c( int motif_length, int grow_mode, std::vector<std::vector<int> > ind_fu,  std::vector<int> ind_fu_upd, 
                                             NumericVector fre_w, NumericVector sg_w, NumericMatrix fre_w_vec,
-                                            NumericVector fre_w_next, NumericVector sg_w_next, NumericMatrix fre_w_vec_next) {
+                                            NumericVector fre_w_next, NumericVector sg_w_next, NumericMatrix fre_w_vec_next,
+                                            int num_cpu) {
   
   int len_in = ind_fu_upd.size();
   int i1, fr, fr_next, len, idx, start_next;

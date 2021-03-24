@@ -68,10 +68,11 @@ Fusion=function(Config,SeqMetFreW,FreVecW){
       if (Config$GrowingMode=="L") SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 3, 2*(w+1)+2)))
       
       # Get equal sequences in Cpp
-      IndFou <- cpp_str_sort(SeqW, SeqNextWCut)
+      # IndFou <- cpp_str_sort(SeqW, SeqNextWCut)
+      ind_data <- find_strings_par(SeqW, SeqNextWCut, nCpu + 1)
       
       # Get index of elements that have to be fusioned.
-      IndFoUpd=which(IndFou %ni% 0)
+      # IndFoUpd=which(IndFou %ni% 0)
       
       # OutFus=FuseSeq(Config, SeqW,MetW,FreW,IndW,FreWVec,SeqNextW,MetNextW,FreNextW,IndNextW,FreNextWVec,IndFou,IndFoUpd)
       grow_mode_numeric <- switch(Config$GrowingMode,
@@ -79,11 +80,20 @@ Fusion=function(Config,SeqMetFreW,FreVecW){
                                    L=1,
                                    R=2)
       
-      ret <- fuse_seqs_c(2*w, grow_mode_numeric, IndFou, IndFoUpd, 
-                         FreW, MetW, FreWVec, 
-                         FreNextW, MetNextW, FreNextWVec)
+      # ret <- fuse_seqs_c(2*w, grow_mode_numeric, IndFou, IndFoUpd, 
+      #                    FreW, MetW, FreWVec, 
+      #                    FreNextW, MetNextW, FreNextWVec)
+      IndFu <- ind_data$str_indexes
+      IndFu_sub <- ind_data$subindexes
+      IndFu_not_void <- ind_data$ind_not_void
+      seqs_to_rm <- ind_data$seqs_to_rm
       
-      OutFus=list(SeqW,MetW,FreW,IndW,FreWVec,SeqNextW,ret$sg_w_next,ret$fre_w_next,IndNextW,ret$fre_w_vec_next)
+      fuse_seqs_openmp(2*w, grow_mode,IndFu, IndFu_sub, IndFu_not_void,
+                       FreW, MetW, FreWVec,
+                       FreNextW, MetNextW, FreNextWVec,
+                       nCpu)
+      
+      OutFus=list(SeqW,MetW,FreW,IndW,FreWVec,SeqNextW,MetNextW,FreNextW,IndNextW,FreNextWVec)
       
       SeqW=OutFus[[1]]
       MetW=OutFus[[2]]
@@ -97,12 +107,12 @@ Fusion=function(Config,SeqMetFreW,FreVecW){
       IndNextW=OutFus[[9]]
       FreNextWVec=OutFus[[10]]
       
-      if(length(IndFoUpd!=0)){
-        SeqW=SeqW[-IndFoUpd]
-        MetW=MetW[-IndFoUpd]
-        FreW=FreW[-IndFoUpd]
-        IndW=IndW[-IndFoUpd]
-        FreWVec=FreWVec[-IndFoUpd,]
+      if(length(seqs_to_rm!=0)){
+        SeqW=SeqW[-seqs_to_rm]
+        MetW=MetW[-seqs_to_rm]
+        FreW=FreW[-seqs_to_rm]
+        IndW=IndW[-seqs_to_rm]
+        FreWVec=FreWVec[-seqs_to_rm,]
       }
       
       # Delete posible void words.
