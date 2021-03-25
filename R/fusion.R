@@ -67,9 +67,16 @@ Fusion=function(Config,SeqMetFreW,FreVecW){
       if (Config$GrowingMode=="R") SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 1, 2*(w+1))))
       if (Config$GrowingMode=="L") SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 3, 2*(w+1)+2)))
       
+      mode(FreW) <- "integer"
+      mode(MetW) <- "numeric"
+      mode(FreWVec) <- "integer"
+      mode(FreNextW) <- "integer"
+      mode(MetNextW) <- "numeric"
+      mode(FreNextWVec) <- "integer"
+      
       # Get equal sequences in Cpp
       # IndFou <- cpp_str_sort(SeqW, SeqNextWCut)
-      ind_data <- find_strings_par(SeqW, SeqNextWCut, nCpu + 1)
+      ind_data <- find_strings_par(SeqW, SeqNextWCut, Config$nCPU + 1)
       
       # Get index of elements that have to be fusioned.
       # IndFoUpd=which(IndFou %ni% 0)
@@ -91,7 +98,7 @@ Fusion=function(Config,SeqMetFreW,FreVecW){
       fuse_seqs_openmp(2*w, grow_mode,IndFu, IndFu_sub, IndFu_not_void,
                        FreW, MetW, FreWVec,
                        FreNextW, MetNextW, FreNextWVec,
-                       nCpu)
+                       Config$nCPU)
       
       OutFus=list(SeqW,MetW,FreW,IndW,FreWVec,SeqNextW,MetNextW,FreNextW,IndNextW,FreNextWVec)
       

@@ -53,11 +53,22 @@ FDR <- function(Config,ScoMotPro,ScoMotRes,PWMFor,POMClu,LenMotif,TypeMotif){
         # Resistant sequences' binding counts and breaks for this motif.
         ScoDatFraRes <- ScanRes[[i]]
         
-        if ( length(ScoDatFraPro) == 0 || length(ScoDatFraRes) == 0 )
+        pro_counts <- ScoDatFraPro$bincounts
+        mode(pro_counts) <- "integer"
+        pro_breaks <- ScoDatFraPro$binbreaks
+        mode(pro_breaks) <- "numeric"
+        res_counts <- ScoDatFraRes$bincounts
+        mode(res_counts) <- "integer"
+        res_breaks <- ScoDatFraRes$binbreaks
+        mode(res_breaks) <- "numeric"
+        
+        if ( length(pro_counts) == 0 || length(pro_breaks) == 0 )
           fdr <- 1.0
         else
           # Get fdr value in cpp
-          fdr <- fdr_c(ScoDatFraPro, ScoDatFraRes, lambda, type_motif_numeric)
+          fdr <- fdr_c(pro_counts, pro_breaks,
+                       res_counts, res_breaks,
+                       lambda, type_motif_numeric)
         fdr
       }
       

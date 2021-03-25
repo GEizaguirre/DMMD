@@ -369,31 +369,47 @@ sequential_exec <- function(){
   
 }
 
+# 
+# SeqW <- genSeqs(num_seq, 2*w)
+# SeqNextW <-  genSeqs(num_seq, 2*w+2)
+# cut_point <- 2*w+1
+# SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 2, cut_point)))
+# 
+# data_par <- find_strings_par(SeqW, SeqNextWCut, nCpu)
+# data_seq <- find_strings_seq(SeqW, SeqNextWCut)
+# 
+# print(names(data_seq))
+# 
+# for (nm in names(data_seq)){
+#   print(paste("checking", nm))
+#   data1 <- data_par[[nm]]
+#   data2 <- data_seq[[nm]]
+#   if (length(data1) != length(data2)){
+#     print(paste("not equal size lists for ", nm))
+#     next
+#   }
+#   for (i in 1:length(data1)){
+#     if (data1[i] != data2[i]){
+#       print(paste("not equal lists ", nm))
+#       break
+#     }
+#   }
+# }
+
 SeqW <- genSeqs(num_seq, 2*w)
 SeqNextW <-  genSeqs(num_seq, 2*w+2)
 cut_point <- 2*w+1
 SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 2, cut_point)))
 
-data_par <- find_strings_par(SeqW, SeqNextWCut, nCpu)
-data_seq <- find_strings_seq(SeqW, SeqNextWCut)
+# Get 
+MetW = runif(num_seq)
+FreW = sample.int(20, num_seq, replace = TRUE)
+IndW = sample.int(20, num_seq, replace = TRUE)
 
-print(names(data_seq))
+MetNextW = runif(num_seq)
+FreNextW = sample.int(20, num_seq, replace = TRUE)
+IndNextW = sample.int(20, num_seq, replace = TRUE)
 
-for (nm in names(data_seq)){
-  print(paste("checking", nm))
-  data1 <- data_par[[nm]]
-  data2 <- data_seq[[nm]]
-  if (length(data1) != length(data2)){
-    print(paste("not equal size lists for ", nm))
-    next
-  }
-  for (i in 1:length(data1)){
-    if (data1[i] != data2[i]){
-      print(paste("not equal lists ", nm))
-      break
-    }
-  }
-}
 
 # library(microbenchmark)
 # microbenchmark(
