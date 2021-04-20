@@ -1,5 +1,6 @@
 #include <Rcpp.h> 
 #include <omp.h>
+#include <iterator>
 using namespace Rcpp;
 
 
@@ -65,6 +66,8 @@ void fuse_seqs_openmp( int motif_length, int grow_mode, IntegerVector str_indexe
   int i_start, i_end, k, i, ind_next, ind_current, j, start_next;
   int fr, fr_next;
   float sg, sg_next;
+  
+  std::cout << "fusing\n";
   
 #pragma omp parallel num_threads(num_cpu)
 #pragma omp for private(i_start, i_end, k, i, ind_next, ind_current, j, start_next, fr, fr_next, sg, sg_next)
@@ -164,6 +167,17 @@ List find_strings_seq( StringVector in_str, StringVector out_str ) {
   return ret;
 }
 
+void resize_int_array(int * arr, int size, int new_size) {
+  size_t newSize = size * 2;
+  int* newArr = new int[newSize];
+  
+  memcpy( newArr, arr, size * sizeof(int) );
+  
+  size = newSize;
+  delete [] arr;
+  arr = newArr;
+}
+
 // [[Rcpp::plugins(openmp)]]
 // [[Rcpp::export]]
 List find_strings_par( StringVector in_str, StringVector out_str, int num_cpu ) {
@@ -174,13 +188,19 @@ List find_strings_par( StringVector in_str, StringVector out_str, int num_cpu ) 
   std::vector < int > str_indexes;
   std::vector < int > subindexes;
   std::vector < int > ind_not_void;
-  std::vector < int > ids_per_thread (num_cpu);
-  std::vector < int > ids_next_per_thread (num_cpu);
+  std::vector < int > ids_per_thread (omp_get_max_threads());
+  std::vector < int > ids_next_per_thread (omp_get_max_threads());
+  num_cpu = omp_get_num_threads();
   
-#pragma omp parallel num_threads(num_cpu)
+  // omp_set_num_threads(num_cpu);
+  
+#pragma omp parallel
 {
+
   size_t i, j;
+  
   int counter = 0;
+  int new_size;
   int next_seq_counter = 0;
   int prev_counter = counter;
   int current_size = int(len_out*3/num_cpu);
@@ -188,18 +208,23 @@ List find_strings_par( StringVector in_str, StringVector out_str, int num_cpu ) 
   std::vector < int > str_indexes_priv (current_size);
   std::vector < int > ind_not_void_priv (int(len_out/num_cpu)+1);
   std::vector < int > subindexes_priv (int(len_out/num_cpu)+1);
+  // int str_indexes_priv[current_size];
+  // int ind_not_void_priv[int(len_out/num_cpu)+1];
+  // int subindexes_priv[int(len_out/num_cpu)+1];
   
-#pragma omp for nowait schedule(static)
+ #pragma omp for schedule(static)
   for (i = 0; i < len_out; i++){
-    
+
     subindexes_priv[next_seq_counter++] = counter;
-    
+
     for (j = 0; j < len_in; j++){
       if (in_str(j) == out_str(i)){
         // resize index vector
         if (!( counter < current_size )){
-          current_size = int(current_size + current_size / 2);
+          new_size = int(current_size + current_size / 2);
           str_indexes_priv.resize(current_size);
+          // resize_int_array(str_indexes_priv, current_size, new_size);
+          current_size = new_size;
         }
         str_indexes_priv[counter++] = j;
       }
@@ -209,165 +234,173 @@ List find_strings_par( StringVector in_str, StringVector out_str, int num_cpu ) 
       prev_counter = counter;
     }
   }
-  
+
   str_indexes_priv.resize(counter);
   ind_not_void_priv.resize(not_void_counter);
-
   subindexes_priv.resize(next_seq_counter);
+  // resize_int_array(str_indexes_priv,current_size,counter);
+  // resize_int_array(ind_not_void_priv,int(len_out/num_cpu)+1,not_void_counter);
+  // resize_int_array(subindexes_priv,int(len_out/num_cpu)+1,next_seq_counter);
 
 #pragma omp for schedule(static) ordered
   for(int i=0; i<omp_get_num_threads(); i++) {
 #pragma omp ordered
-    
+
     ids_next_per_thread[omp_get_thread_num()] = next_seq_counter;
     ids_per_thread[omp_get_thread_num()] = counter;
     ind_not_void.insert(ind_not_void.end(), ind_not_void_priv.begin(), ind_not_void_priv.end());
     str_indexes.insert(str_indexes.end(), str_indexes_priv.begin(), str_indexes_priv.end());
     subindexes.insert(subindexes.end(), subindexes_priv.begin(), subindexes_priv.end());
-  }  
-  
+    // ind_not_void.insert(ind_not_void.end(), ind_not_void_priv , ind_not_void_priv + not_void_counter);
+    // str_indexes.insert(str_indexes.end(), str_indexes_priv, str_indexes_priv + counter);
+    // subindexes.insert(subindexes.end(), subindexes_priv, subindexes_priv + next_seq_counter);
+    
+    std::cout << omp_get_thread_num() << "/" << omp_get_num_threads() <<" finished\n";
   }
   
-
-  int accum_ids = ids_per_thread[0];
-  int accum_ids_next = ids_next_per_thread[0];
-  
-  for (int idc = 1; idc < num_cpu; idc++ ){
-
-    int end_id = accum_ids_next + ids_next_per_thread[idc];
-
-    for (int ii = accum_ids_next; ii < end_id; ii++ ){
-      subindexes[ii] += accum_ids;
-
-    }
-
-    accum_ids += ids_per_thread[idc];
-    accum_ids_next = end_id;
-
-  }
-  
-  subindexes.push_back(str_indexes.size());
-  
-  std::vector < int > seqs_to_rm = str_indexes;
-  std::sort(seqs_to_rm.begin(), seqs_to_rm.end());
-  seqs_to_rm.erase(unique(seqs_to_rm.begin(),seqs_to_rm.end()),seqs_to_rm.end());
-  
-  for (int j = 0; j < seqs_to_rm.size(); j++ )
-    seqs_to_rm[j]++;
-  
-  List ret;
-  ret["str_indexes"] = str_indexes;
-  ret["subindexes"] = subindexes;
-  ret["ind_not_void"] = ind_not_void;
-  ret["seqs_to_rm"] = seqs_to_rm;
-  return ret;
 }
+
+
+int accum_ids = ids_per_thread[0];
+int accum_ids_next = ids_next_per_thread[0];
+
+for (int idc = 1; idc < num_cpu; idc++ ){
+  
+  int end_id = accum_ids_next + ids_next_per_thread[idc];
+  
+  for (int ii = accum_ids_next; ii < end_id; ii++ ){
+    subindexes[ii] += accum_ids;
+    
+  }
+  
+  accum_ids += ids_per_thread[idc];
+  accum_ids_next = end_id;
+  
+}
+
+subindexes.push_back(str_indexes.size());
+
+std::vector < int > seqs_to_rm = str_indexes;
+std::sort(seqs_to_rm.begin(), seqs_to_rm.end());
+seqs_to_rm.erase(unique(seqs_to_rm.begin(),seqs_to_rm.end()),seqs_to_rm.end());
+
+for (int j = 0; j < seqs_to_rm.size(); j++ )
+  seqs_to_rm[j]++;
+
+List ret;
+ret["str_indexes"] = str_indexes;
+ret["subindexes"] = subindexes;
+ret["ind_not_void"] = ind_not_void;
+ret["seqs_to_rm"] = seqs_to_rm;
+return ret;
+}
+
 
 /*** R
 
-w = 2
-LETTERS = c( 'a', 'c', 't', 'g' )
-num_seq = 10000
-values <- 1:num_seq
-nCpu <- 3
-numWorkers <- nCpu
-'%ni%' = Negate('%in%')
-
-# Create sequence
-genSeqs <- function(n = 10000, s=10) {
-  do.call(paste0, replicate(s, sample(LETTERS, n, TRUE), FALSE))
-}
-
-parallel_exec <- function(){
-  
-  time1 <- Sys.time()
-  SeqW <- genSeqs(num_seq, w)
-  SeqNextW <-  genSeqs(num_seq, w+1)
-  SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 2, 2*(w+1)+2-1)))
-  
-  SeqW <- genSeqs(num_seq, 2*w)
-  SeqNextW <-  genSeqs(num_seq, 2*w+2)
-  cut_point <- 2*w+1
-  SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 2, cut_point)))
-  
-  # Get 
-  MetW = runif(num_seq)
-  FreW = sample.int(20, num_seq, replace = TRUE)
-  IndW = sample.int(20, num_seq, replace = TRUE)
-  
-  MetNextW = runif(num_seq)
-  FreNextW = sample.int(20, num_seq, replace = TRUE)
-  IndNextW = sample.int(20, num_seq, replace = TRUE)
-  
-  FreWVec <- matrix(nrow=num_seq, ncol = 2*w)
-  for (i in 1:num_seq){
-    FreWVec[i, ] <- sample.int(10, 2*w, replace = TRUE)
-  }
-  
-  FreNextWVec <- matrix(nrow=num_seq, ncol = 2*w+2)
-  for (i in 1:num_seq){
-    FreNextWVec[i, ] <- sample.int(10, 2*w+2, replace = TRUE)
-  }
-  time2 <- Sys.time()
-  print(paste("data generated at", time2-time1, "s"))
-  
-  grow_mode = 0
-  
-  ind_data <- find_strings_seq(SeqW, SeqNextWCut)
-  
-  IndFu <- ind_data$str_indexes
-  IndFu_sub <- ind_data$subindexes
-  IndFu_not_void <- ind_data$ind_not_void
-  seqs_to_rm <- ind_data$seqs_to_rm
-  
-  time3 <- Sys.time()
-  print(paste("strings paired at", time3-time2, "s"))
-  
-  fuse_seqs_openmp(2*w, grow_mode,IndFu, IndFu_sub, IndFu_not_void,
-                   FreW, MetW, FreWVec,
-                   FreNextW, MetNextW, FreNextWVec,
-                   nCpu)
-  
-  time4 <- Sys.time()
-  print(paste("strings fusioned at", time4-time3, "s"))
-}
-
-sequential_exec <- function(){
-  
-  SeqW <- genSeqs(num_seq, 2*w)
-  SeqNextW <-  genSeqs(num_seq, 2*w+2)
-  cut_point <- 2*w+1
-  SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 2, cut_point)))
-  
-  # Get 
-  MetW = runif(num_seq)
-  FreW = sample.int(20, num_seq, replace = TRUE)
-  IndW = sample.int(20, num_seq, replace = TRUE)
-  
-  MetNextW = runif(num_seq)
-  FreNextW = sample.int(20, num_seq, replace = TRUE)
-  IndNextW = sample.int(20, num_seq, replace = TRUE)
-  
-  FreWVec <- matrix(nrow=num_seq, ncol = 2*w)
-  for (i in 1:num_seq){
-    FreWVec[i, ] <- sample.int(10, 2*w, replace = TRUE)
-  }
-  
-  FreNextWVec <- matrix(nrow=num_seq, ncol = 2*w+2)
-  for (i in 1:num_seq){
-    FreNextWVec[i, ] <- sample.int(10, 2*w+2, replace = TRUE)
-  }
-  
-  grow_mode = 0
-  
-  ind_data <- find_strings_seq(SeqW, SeqNextWCut)
-  
-  IndFu <- ind_data$str_indexes
-  IndFu_sub <- ind_data$subindexes
-  IndFu_not_void <- ind_data$ind_not_void
-  seqs_to_rm <- ind_data$seqs_to_rm
-  
-}
+# w = 2
+# LETTERS = c( 'a', 'c', 't', 'g' )
+# num_seq = 10000
+# values <- 1:num_seq
+# nCpu <- 3
+# numWorkers <- nCpu
+# '%ni%' = Negate('%in%')
+# 
+# # Create sequence
+# genSeqs <- function(n = 10000, s=10) {
+#   do.call(paste0, replicate(s, sample(LETTERS, n, TRUE), FALSE))
+# }
+# 
+# parallel_exec <- function(){
+#   
+#   time1 <- Sys.time()
+#   SeqW <- genSeqs(num_seq, w)
+#   SeqNextW <-  genSeqs(num_seq, w+1)
+#   SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 2, 2*(w+1)+2-1)))
+#   
+#   SeqW <- genSeqs(num_seq, 2*w)
+#   SeqNextW <-  genSeqs(num_seq, 2*w+2)
+#   cut_point <- 2*w+1
+#   SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 2, cut_point)))
+#   
+#   # Get 
+#   MetW = runif(num_seq)
+#   FreW = sample.int(20, num_seq, replace = TRUE)
+#   IndW = sample.int(20, num_seq, replace = TRUE)
+#   
+#   MetNextW = runif(num_seq)
+#   FreNextW = sample.int(20, num_seq, replace = TRUE)
+#   IndNextW = sample.int(20, num_seq, replace = TRUE)
+#   
+#   FreWVec <- matrix(nrow=num_seq, ncol = 2*w)
+#   for (i in 1:num_seq){
+#     FreWVec[i, ] <- sample.int(10, 2*w, replace = TRUE)
+#   }
+#   
+#   FreNextWVec <- matrix(nrow=num_seq, ncol = 2*w+2)
+#   for (i in 1:num_seq){
+#     FreNextWVec[i, ] <- sample.int(10, 2*w+2, replace = TRUE)
+#   }
+#   time2 <- Sys.time()
+#   print(paste("data generated at", time2-time1, "s"))
+#   
+#   grow_mode = 0
+#   
+#   ind_data <- find_strings_seq(SeqW, SeqNextWCut)
+#   
+#   IndFu <- ind_data$str_indexes
+#   IndFu_sub <- ind_data$subindexes
+#   IndFu_not_void <- ind_data$ind_not_void
+#   seqs_to_rm <- ind_data$seqs_to_rm
+#   
+#   time3 <- Sys.time()
+#   print(paste("strings paired at", time3-time2, "s"))
+#   
+#   fuse_seqs_openmp(2*w, grow_mode,IndFu, IndFu_sub, IndFu_not_void,
+#                    FreW, MetW, FreWVec,
+#                    FreNextW, MetNextW, FreNextWVec,
+#                    nCpu)
+#   
+#   time4 <- Sys.time()
+#   print(paste("strings fusioned at", time4-time3, "s"))
+# }
+# 
+# sequential_exec <- function(){
+#   
+#   SeqW <- genSeqs(num_seq, 2*w)
+#   SeqNextW <-  genSeqs(num_seq, 2*w+2)
+#   cut_point <- 2*w+1
+#   SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 2, cut_point)))
+#   
+#   # Get 
+#   MetW = runif(num_seq)
+#   FreW = sample.int(20, num_seq, replace = TRUE)
+#   IndW = sample.int(20, num_seq, replace = TRUE)
+#   
+#   MetNextW = runif(num_seq)
+#   FreNextW = sample.int(20, num_seq, replace = TRUE)
+#   IndNextW = sample.int(20, num_seq, replace = TRUE)
+#   
+#   FreWVec <- matrix(nrow=num_seq, ncol = 2*w)
+#   for (i in 1:num_seq){
+#     FreWVec[i, ] <- sample.int(10, 2*w, replace = TRUE)
+#   }
+#   
+#   FreNextWVec <- matrix(nrow=num_seq, ncol = 2*w+2)
+#   for (i in 1:num_seq){
+#     FreNextWVec[i, ] <- sample.int(10, 2*w+2, replace = TRUE)
+#   }
+#   
+#   grow_mode = 0
+#   
+#   ind_data <- find_strings_seq(SeqW, SeqNextWCut)
+#   
+#   IndFu <- ind_data$str_indexes
+#   IndFu_sub <- ind_data$subindexes
+#   IndFu_not_void <- ind_data$ind_not_void
+#   seqs_to_rm <- ind_data$seqs_to_rm
+#   
+# }
 
 # 
 # SeqW <- genSeqs(num_seq, 2*w)
@@ -396,19 +429,19 @@ sequential_exec <- function(){
 #   }
 # }
 
-SeqW <- genSeqs(num_seq, 2*w)
-SeqNextW <-  genSeqs(num_seq, 2*w+2)
-cut_point <- 2*w+1
-SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 2, cut_point)))
-
-# Get 
-MetW = runif(num_seq)
-FreW = sample.int(20, num_seq, replace = TRUE)
-IndW = sample.int(20, num_seq, replace = TRUE)
-
-MetNextW = runif(num_seq)
-FreNextW = sample.int(20, num_seq, replace = TRUE)
-IndNextW = sample.int(20, num_seq, replace = TRUE)
+# SeqW <- genSeqs(num_seq, 2*w)
+# SeqNextW <-  genSeqs(num_seq, 2*w+2)
+# cut_point <- 2*w+1
+# SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 2, cut_point)))
+# 
+# # Get 
+# MetW = runif(num_seq)
+# FreW = sample.int(20, num_seq, replace = TRUE)
+# IndW = sample.int(20, num_seq, replace = TRUE)
+# 
+# MetNextW = runif(num_seq)
+# FreNextW = sample.int(20, num_seq, replace = TRUE)
+# IndNextW = sample.int(20, num_seq, replace = TRUE)
 
 
 # library(microbenchmark)
@@ -417,6 +450,42 @@ IndNextW = sample.int(20, num_seq, replace = TRUE)
 #   find_strings_seq(SeqW, SeqNextWCut),
 #   times = 10
 # )
+print("loading data")
+print(list.files("../.."))
+load("../../fusion_data_0.Rdata")
 
+w = 6
+
+Config <- list()
+Config$GrowingMode <- "C"
+Config$nCPU <- 3
+
+if (Config$GrowingMode=="C") {
+  cut_point <- 2*w+1
+  SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 2, cut_point)))
+}
+if (Config$GrowingMode=="R") SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 1, 2*(w+1))))
+if (Config$GrowingMode=="L") SeqNextWCut <- unlist(lapply(SeqNextW, function(x) substring(x, 3, 2*(w+1)+2)))
+
+mode(FreW) <- "integer"
+mode(MetW) <- "numeric"
+mode(FreWVec) <- "integer"
+mode(FreNextW) <- "integer"
+mode(MetNextW) <- "numeric"
+mode(FreNextWVec) <- "integer"
+
+# SeqW <- SeqW[1:100000]
+# SeqNextWCut <- SeqNextWCut[1:100000]
+
+# Get equal sequences in Cpp
+print("finding strings")
+start_time <- Sys.time()
+ind_data <- find_strings_par(SeqW, SeqNextWCut, Config$nCPU + 3)
+end_time <- Sys.time()
+
+print(end_time-start_time)
+
+print("saving image")
+save.image(file="fusion_omp_test.RData")
 
 */

@@ -95,7 +95,7 @@ Fusion=function(Config,SeqMetFreW,FreVecW){
       IndFu_not_void <- ind_data$ind_not_void
       seqs_to_rm <- ind_data$seqs_to_rm
       
-      fuse_seqs_openmp(2*w, grow_mode,IndFu, IndFu_sub, IndFu_not_void,
+      fuse_seqs_openmp(2*w, grow_mode_numeric,IndFu, IndFu_sub, IndFu_not_void,
                        FreW, MetW, FreWVec,
                        FreNextW, MetNextW, FreNextWVec,
                        Config$nCPU)

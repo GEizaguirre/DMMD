@@ -6,16 +6,18 @@
 using namespace Rcpp;
 
 // fdr_c
-float fdr_c(NumericMatrix ScoDatFraPro, NumericMatrix ScoDatFraRes, float lambda, int type_motif);
-RcppExport SEXP _DMMD_fdr_c(SEXP ScoDatFraProSEXP, SEXP ScoDatFraResSEXP, SEXP lambdaSEXP, SEXP type_motifSEXP) {
+float fdr_c(IntegerVector ProCounts, NumericVector ProBreaks, IntegerVector ResCounts, NumericVector ResBreaks, float lambda, int type_motif);
+RcppExport SEXP _DMMD_fdr_c(SEXP ProCountsSEXP, SEXP ProBreaksSEXP, SEXP ResCountsSEXP, SEXP ResBreaksSEXP, SEXP lambdaSEXP, SEXP type_motifSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type ScoDatFraPro(ScoDatFraProSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type ScoDatFraRes(ScoDatFraResSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type ProCounts(ProCountsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type ProBreaks(ProBreaksSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type ResCounts(ResCountsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type ResBreaks(ResBreaksSEXP);
     Rcpp::traits::input_parameter< float >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< int >::type type_motif(type_motifSEXP);
-    rcpp_result_gen = Rcpp::wrap(fdr_c(ScoDatFraPro, ScoDatFraRes, lambda, type_motif));
+    rcpp_result_gen = Rcpp::wrap(fdr_c(ProCounts, ProBreaks, ResCounts, ResBreaks, lambda, type_motif));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -167,7 +169,7 @@ RcppExport SEXP scanPOMs(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 RcppExport SEXP SeqDic(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_DMMD_fdr_c", (DL_FUNC) &_DMMD_fdr_c, 4},
+    {"_DMMD_fdr_c", (DL_FUNC) &_DMMD_fdr_c, 6},
     {"_DMMD_cpp_str_sort", (DL_FUNC) &_DMMD_cpp_str_sort, 2},
     {"_DMMD_fuse_seqs_c", (DL_FUNC) &_DMMD_fuse_seqs_c, 11},
     {"_DMMD_fuse_seqs_seq", (DL_FUNC) &_DMMD_fuse_seqs_seq, 12},
