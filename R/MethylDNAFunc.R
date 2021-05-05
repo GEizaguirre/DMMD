@@ -2577,11 +2577,15 @@ ListFDR =DNAMethylationMotifFinding=function(Config){
   #####Logos and Histograms
   
     print("Drawing logos")
-
+    t1 <- Sys.time()
     DifResultForProne = LogoScanPlot(Config,MotifSelecForProne,LenMotif3ForProne,FP)
     DifResultRevProne = LogoScanPlot(Config,MotifSelecRevProne,LenMotif3RevProne,RP)
     DifResultForResis = LogoScanPlot(Config,MotifSelecForResis,LenMotif3ForResis,FR)
     DifResultRevResis = LogoScanPlot(Config,MotifSelecRevResis,LenMotif3RevResis,RR)
+    t2 <- Sys.time()
+    print(t2-t1)
+    
+    
 
   if(Config$DrawLogo==TRUE){
     

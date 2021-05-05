@@ -67,8 +67,6 @@ void fuse_seqs_openmp( int motif_length, int grow_mode, IntegerVector str_indexe
   int fr, fr_next;
   float sg, sg_next;
   
-  std::cout << "fusing\n";
-  
 #pragma omp parallel num_threads(num_cpu)
 #pragma omp for private(i_start, i_end, k, i, ind_next, ind_current, j, start_next, fr, fr_next, sg, sg_next)
   for (i = 0; i < len_next; i++){
@@ -254,9 +252,7 @@ List find_strings_par( StringVector in_str, StringVector out_str, int num_cpu ) 
     // ind_not_void.insert(ind_not_void.end(), ind_not_void_priv , ind_not_void_priv + not_void_counter);
     // str_indexes.insert(str_indexes.end(), str_indexes_priv, str_indexes_priv + counter);
     // subindexes.insert(subindexes.end(), subindexes_priv, subindexes_priv + next_seq_counter);
-    
-    std::cout << omp_get_thread_num() << "/" << omp_get_num_threads() <<" finished\n";
-  }
+      }
   
 }
 

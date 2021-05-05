@@ -7,6 +7,8 @@ CheckDifferencesInDistributions=function(Config,SelMoti,LenMotif,TypeMotif){
                 RevProne = "less",
                 ForResis = "greater",
                 RevResis = "greater")
+  
+  N = 10000
   # Returning structure.
   FinMot=list()
   
@@ -36,13 +38,17 @@ CheckDifferencesInDistributions=function(Config,SelMoti,LenMotif,TypeMotif){
         ScoProVec=unlist(sapply(1:length(ScoDatFraPro[,1]), function(i) rep(ScoDatFraPro[,2][i],ScoDatFraPro[,1][i])))
         ScoResVec=unlist(sapply(1:length(ScoDatFraRes[,1]), function(i) rep(ScoDatFraRes[,2][i],ScoDatFraRes[,1][i])))
         
+        # score volume reduction for faster execution and supression of ties.
+        sample1 <- sample(ScoProVec, N, replace = FALSE)
+        sample2 <- sample(ScoResVec, N, replace = FALSE)
+        
         # Kolmogorov test or Mann-Whitney test for binding scores.
         if (Config$DistDif=="ks"){
-          out=ks.test(ScoProVec,ScoResVec,alternative=AltHyp)
+          # out=ks.test(ScoProVec,ScoResVec,alternative=AltHyp)
+          out = ks.test(sample1, sample2)
         }else{
-          out=wilcox.test(ScoProVec,ScoResVec,alternative="two.sided",paired=FALSE)
+          out = wilcox.test(sample1, sample2,alternative="two.sided",paired=FALSE)
         }
-        
         
         if(out$p.value > Config$significance_level) i 
       }
