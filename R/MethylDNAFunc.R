@@ -1608,7 +1608,7 @@ LogoScanPlot=function(Config,MotifSelec,LenMotif,TypeMotif){
         # 
         # dat <- rbind(dat1,dat2)
         # cdat <- ddply(dat, "Set", summarise, rating.mean=mean(Score))
-        res <- mean_diff_cpp(ScoDatFraPro[,1], ScoDatFraPro[,2], ScoDatFraRes[,1], ScoDatFraRes[,2])
+        res <- mean_diff_cpp(ScoDatFraPro[,2], ScoDatFraPro[,1], ScoDatFraRes[,2], ScoDatFraRes[,1])
         cdat <- data.frame(Set = c("Prone", "Resistant"), Score = c(res[0], res[1]))
         DifResult[[w]][[j]] = cdat
         j = j + 1 
