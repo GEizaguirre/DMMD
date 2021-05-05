@@ -1599,19 +1599,21 @@ LogoScanPlot=function(Config,MotifSelec,LenMotif,TypeMotif){
         
         ScoDatFraPro=DistProne[[i]]
         ScoDatFraRes=DistResis[[i]]
-        p=unlist(sapply(1:length(ScoDatFraPro[,1]), function(i) rep(ScoDatFraPro[,2][i],ScoDatFraPro[,1][i])))
-        r=unlist(sapply(1:length(ScoDatFraRes[,1]), function(i) rep(ScoDatFraRes[,2][i],ScoDatFraRes[,1][i])))
+        # p=unlist(sapply(1:length(ScoDatFraPro[,1]), function(i) rep(ScoDatFraPro[,2][i],ScoDatFraPro[,1][i])))
+        # r=unlist(sapply(1:length(ScoDatFraRes[,1]), function(i) rep(ScoDatFraRes[,2][i],ScoDatFraRes[,1][i])))
       
-        dat1 <- data.frame(Set = factor(rep(c("Prone"), each=length(p))), Score = p)
-        
-        dat2 <- data.frame(Set = factor(rep(c("Resistant"), each=length(r))), Score = r)
-      
-        dat=rbind(dat1,dat2)
-        cdat <- ddply(dat, "Set", summarise, rating.mean=mean(Score))
+        # dat1 <- data.frame(Set = factor(rep(c("Prone"), each=length(p))), Score = p)
+        # 
+        # dat2 <- data.frame(Set = factor(rep(c("Resistant"), each=length(r))), Score = r)
+        # 
+        # dat <- rbind(dat1,dat2)
+        # cdat <- ddply(dat, "Set", summarise, rating.mean=mean(Score))
+        res <- mean_diff_cpp(ScoDatFraPro[,1], ScoDatFraPro[,2], ScoDatFraRes[,1], ScoDatFraRes[,2])
+        cdat <- data.frame(Set = c("Prone", "Resistant"), Score = c(res[0], res[1]))
         DifResult[[w]][[j]] = cdat
         j = j + 1 
 
-	if(Config$DrawLogo==TRUE){
+	  if(Config$DrawLogo==TRUE){
      
 
         mypathScan <- file.path(PathScanDir, paste(Config$MotifTarget,"_", Config$DatasetName , Mode, Config$X,"_", 2*w+2, "_", names[i],".png",sep=""))
