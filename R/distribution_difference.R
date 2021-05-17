@@ -39,13 +39,13 @@ CheckDifferencesInDistributions=function(Config,SelMoti,LenMotif,TypeMotif){
         ScoResVec=unlist(sapply(1:length(ScoDatFraRes[,1]), function(i) rep(ScoDatFraRes[,2][i],ScoDatFraRes[,1][i])))
         
         # score volume reduction for faster execution and supression of ties.
-        sample1 <- sample(ScoProVec, N, replace = FALSE)
-        sample2 <- sample(ScoResVec, N, replace = FALSE)
+        # sample1 <- sample(ScoProVec, N, replace = FALSE)
+        # sample2 <- sample(ScoResVec, N, replace = FALSE)
         
         # Kolmogorov test or Mann-Whitney test for binding scores.
         if (Config$DistDif=="ks"){
-          # out=ks.test(ScoProVec,ScoResVec,alternative=AltHyp)
-          out = ks.test(sample1, sample2)
+          out=ks.test(ScoProVec,ScoResVec,alternative=AltHyp)
+          # out = ks.test(sample1, sample2, alternative = AltHyp)
         }else{
           out = wilcox.test(sample1, sample2,alternative="two.sided",paired=FALSE)
         }

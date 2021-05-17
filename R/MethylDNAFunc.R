@@ -2452,6 +2452,8 @@ ListFDR =DNAMethylationMotifFinding=function(Config){
   t1 <- Sys.time()
   print("Reverse Resistant POMs")
   MotifSelecRevResis=CheckDifferencesInDistributions(Config,MotAftTesRevResis,LenMotif2RevResis,RR)
+  t2 <- Sys.time()
+  print(t2-t1)
   
   #Log
   # line <- "Kolmogorov done"

@@ -181,47 +181,53 @@ void gen_kolmogorov_table (std::vector<int> ns, std::vector<float> alphas){
 
 
 /*** R
-N = 10000
+N = 10000000
+
+sample1 <- runif(N)
+sample2 <- runif(N)
+
+resR = ks.test(sample1, sample2, alternative = "greater")
+resR
 
 # D calculation gives the same result in Rcpp and R, table value calculation gives
 # slight differences. We could check saving the table locally.
 
-func_R <- function(){
-  sample1 <- runif(N)
-  sample2 <- runif(N)
-  resR = ks.test(sample1, sample2)
-} 
-
-func_C <- function(){
-  sample1 <- runif(N)
-  sample2 <- runif(N)
-  resC = ks_c(sample1, sample2)
-} 
-
-library(microbenchmark)
-microbenchmark(func_R,
-               func_C,
-               times = 20)
+# func_R <- function(){
+#   sample1 <- runif(N)
+#   sample2 <- runif(N)
+#   resR = ks.test(sample1, sample2)
+# } 
+# 
+# func_C <- function(){
+#   sample1 <- runif(N)
+#   sample2 <- runif(N)
+#   resC = ks_c(sample1, sample2)
+# } 
+# 
+# library(microbenchmark)
+# microbenchmark(func_R,
+#                func_C,
+#                times = 20)
 
 #
-sample1 <- runif(N)
-sample2 <- runif(N)
-t1 <- Sys.time()
-res = ks.test(sample1, sample2)
-print(res)
-print(res$p.value)
-t2 <- Sys.time()
-print(t2-t1)
-t1 <- Sys.time()
-res = ks_c(sample1, sample2)
-print(res)
-t2 <- Sys.time()
-print(t2-t1)
-
-ns = seq(1,3)
-alphas = c(0.001, 0.1, 0.2)
-
-gen_kolmogorov_table(ns, alphas)
+# sample1 <- runif(N)
+# sample2 <- runif(N)
+# t1 <- Sys.time()
+# res = ks.test(sample1, sample2)
+# print(res)
+# print(res$p.value)
+# t2 <- Sys.time()
+# print(t2-t1)
+# t1 <- Sys.time()
+# res = ks_c(sample1, sample2)
+# print(res)
+# t2 <- Sys.time()
+# print(t2-t1)
+# 
+# ns = seq(1,3)
+# alphas = c(0.001, 0.1, 0.2)
+# 
+# gen_kolmogorov_table(ns, alphas)
 
 # NB <- 1000000
 # sample1 <- runif(NB)
