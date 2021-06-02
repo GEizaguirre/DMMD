@@ -48,27 +48,36 @@ FDR <- function(Config,ScoMotPro,ScoMotRes,PWMFor,POMClu,LenMotif,TypeMotif){
       # For each motif.
       VecFdr <- foreach(i=1:(length(ScanRes)),.combine=c) %dopar% {
         
-        # Prone sequences' binding counts and breaks for this motif.
-        ScoDatFraPro <- ScanPro[[i]]
-        # Resistant sequences' binding counts and breaks for this motif.
-        ScoDatFraRes <- ScanRes[[i]]
+        fdr <-tryCatch (
+        {
+            # Prone sequences' binding counts and breaks for this motif.
+            ScoDatFraPro <- ScanPro[[i]]
+            # Resistant sequences' binding counts and breaks for this motif.
+            ScoDatFraRes <- ScanRes[[i]]
+            
+            pro_counts <- ScoDatFraPro$bincounts
+            mode(pro_counts) <- "integer"
+            pro_breaks <- ScoDatFraPro$binbreaks
+            mode(pro_breaks) <- "numeric"
+            res_counts <- ScoDatFraRes$bincounts
+            mode(res_counts) <- "integer"
+            res_breaks <- ScoDatFraRes$binbreaks
+            mode(res_breaks) <- "numeric"
+            
+            if ( length(pro_counts) == 0 || length(pro_breaks) == 0 )
+              fdr_ <- 1.0
+            else
+              # Get fdr value in cpp
+              fdr_ <- fdr_c(pro_counts, pro_breaks,
+                           res_counts, res_breaks,
+                           lambda, type_motif_numeric)
+            fdr_
+          },
+          error = function(e){
+            1.0
+          }
+        )
         
-        pro_counts <- ScoDatFraPro$bincounts
-        mode(pro_counts) <- "integer"
-        pro_breaks <- ScoDatFraPro$binbreaks
-        mode(pro_breaks) <- "numeric"
-        res_counts <- ScoDatFraRes$bincounts
-        mode(res_counts) <- "integer"
-        res_breaks <- ScoDatFraRes$binbreaks
-        mode(res_breaks) <- "numeric"
-        
-        if ( length(pro_counts) == 0 || length(pro_breaks) == 0 )
-          fdr <- 1.0
-        else
-          # Get fdr value in cpp
-          fdr <- fdr_c(pro_counts, pro_breaks,
-                       res_counts, res_breaks,
-                       lambda, type_motif_numeric)
         fdr
       }
       
