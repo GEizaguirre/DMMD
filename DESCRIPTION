@@ -18,6 +18,7 @@ Collate:
   fdr.R
   distribution_difference.R
   gene_annotation_read.R
+  read_words.R
 License: GPL-2
 Imports:
 	cluster,
